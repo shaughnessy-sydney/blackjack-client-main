@@ -132,8 +132,6 @@ public class BlackjackGUI extends JFrame {
                 sessionId = state.sessionId;
                 state = promptAndPlaceBet();
                 if (state != null) {
-                    System.out.println("After bet, playerCards: " + state.playerCards);
-                    System.out.println("After bet, dealerCards: " + state.dealerCards);
                     updateUIWithGameState(state);
                 }
 
@@ -243,7 +241,7 @@ public class BlackjackGUI extends JFrame {
         dialog.setVisible(true);
     }
 
-    private void updateUIWithGameState(GameState state) {
+    private void updateUIWithGameState(GameState state) throws Exception {
         // Auto-reset if less than 5 cards left in the deck
         if (state.cardsRemaining < 5) {
             try {
@@ -270,12 +268,63 @@ public class BlackjackGUI extends JFrame {
                 cardPanel.addDealerCard(getCard(cardName));
             }
         }
+
         repaint();
+
+        //check if game is over
+        if(state.gameOver) {
+            showResultsDialog(state);
+            try {
+                clientConnecter.finishGame(sessionId);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error finishing game: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+            // show play again button (reconnect to session)
+            // some of this code is redundant but it works
+            int playAgain = JOptionPane.showConfirmDialog(this, "Play again?", "Game Over", JOptionPane.YES_NO_OPTION);
+            if(playAgain == JOptionPane.YES_OPTION) {
+                        state = clientConnecter.resumeSession(sessionId);
+                    
+                        // If no cards, prompt for bet and place it
+                        boolean needsBet = (state.playerCards == null || state.playerCards.isEmpty())
+                                        && (state.dealerCards == null || state.dealerCards.isEmpty());
+                        if (needsBet) {
+                            if (needsBet) {
+                                state = promptAndPlaceBet();
+                                if (state == null) return;
+                            }
+                        }
+                        try {
+                            Thread.sleep(200); // Wait 200 milliseconds
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                        }
+                        state = clientConnecter.getGameState(sessionId);
+
+                        // Update UI
+                        updateUIWithGameState(state);
+            }
+            else{
+                //show menu buttons
+            }
+        }
+        repaint();
+
     }
+
+    // adds a results dialog to the game
+    private void showResultsDialog(GameState state) {
+        String message = "Game Over!\n";
+        message += "Outcome: " + state.outcome + "\n";
+        message += "Balance: " + state.balance + "\n";
+
+        JOptionPane.showMessageDialog(this, message, "Game Results", JOptionPane.INFORMATION_MESSAGE);
+    }
+
 
     private GameState promptAndPlaceBet() throws Exception {
         while (true) {
-            String input = JOptionPane.showInputDialog(this, "Enter your bet amount:", "Place Bet", JOptionPane.PLAIN_MESSAGE);
+            String input = JOptionPane.showInputDialog(this, "Enter your bet amount in multiples of 10:", "Place Bet", JOptionPane.PLAIN_MESSAGE);
             if (input == null) return null; // User cancelled
             try {
                 int betAmount = Integer.parseInt(input.trim());
