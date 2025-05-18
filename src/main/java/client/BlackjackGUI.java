@@ -111,7 +111,6 @@ public class BlackjackGUI extends JFrame {
                     sessionStrings.add("Session ID: " + session.sessionId + ", Balance: " + session.balance);               
                 }
                 showListPopup("Choose an item", sessionStrings);
-                hideMenuButtons();
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Error loading game: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -313,6 +312,7 @@ public class BlackjackGUI extends JFrame {
                         // Resume session
                         GameState state = clientConnecter.resumeSession(selectedSessionId);
                         sessionId = selectedSessionId;
+                        hideMenuButtons();
 
                         // If no cards, prompt for bet and place it
                         boolean needsBet = (state.playerCards == null || state.playerCards.isEmpty())
@@ -337,7 +337,6 @@ public class BlackjackGUI extends JFrame {
                         JOptionPane.showMessageDialog(
                             BlackjackGUI.this, "Error resuming session: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                     }
-                    hideMenuButtons();
                     dialog.dispose();
                 }
             }
@@ -402,6 +401,7 @@ public class BlackjackGUI extends JFrame {
             int playAgain = JOptionPane.showConfirmDialog(this, "Play again?", "Game Over", JOptionPane.YES_NO_OPTION);
             if(playAgain == JOptionPane.YES_OPTION) {
                         state = clientConnecter.resumeSession(sessionId);
+                        hideMenuButtons();
                     
                         // If no cards, prompt for bet and place it
                         boolean needsBet = (state.playerCards == null || state.playerCards.isEmpty())
@@ -462,6 +462,7 @@ public class BlackjackGUI extends JFrame {
                 //show hit/stand buttons
                 hitButton.setVisible(true);
                 standButton.setVisible(true);
+                
                 return clientConnecter.getGameState(sessionId);
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Please enter a valid positive number.", "Invalid Bet", JOptionPane.ERROR_MESSAGE);

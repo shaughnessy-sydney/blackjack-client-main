@@ -19,11 +19,9 @@ public class ListPopup {
         }
 
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        list.setFixedCellWidth(460); // Make list cells wide
-
         list.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
+                if (e.getClickCount() == 2) { // double click to select
                     String selected = list.getSelectedValue();
                     System.out.println("Selected: " + selected);
                     dialog.dispose();
@@ -32,8 +30,7 @@ public class ListPopup {
         });
 
         JScrollPane scrollPane = new JScrollPane(list);
-        dialog.getContentPane().setLayout(new BorderLayout());
-        dialog.add(scrollPane, BorderLayout.CENTER);
+        dialog.add(scrollPane);
         dialog.setVisible(true);
     }
 
