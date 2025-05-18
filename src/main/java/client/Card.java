@@ -54,7 +54,7 @@ public enum Card
     QUEEN_OF_SPADES("QS"),
     KING_OF_SPADES("KS"),
     ACE_OF_SPADES("AS");
-
+    
     private String string;
     Card(String card) {
         this.string = card;

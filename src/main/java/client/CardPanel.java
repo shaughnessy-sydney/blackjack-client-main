@@ -24,12 +24,16 @@ public class CardPanel extends JPanel
     private List<Card> playerCards = new ArrayList<>();
     private Map<Card, ImageIcon> cardImages;
     //private Random random;
+    private ImageIcon cardBackImage; // Add this field
 
     public CardPanel(JButton hitButton, JButton standButton, Map<Card, ImageIcon> cardImages)
     {
         this.hitButton = hitButton;
         this.standButton = standButton;
         this.cardImages = cardImages;
+
+        // Load the card back image
+        cardBackImage = new ImageIcon(getClass().getResource("/assets/back.png"));
 
         // null layout manager is absolute positioning
         setLayout(null);
@@ -68,13 +72,18 @@ public class CardPanel extends JPanel
         int y = 100;
         // dealer cards
         for (Card card : dealerCards) {
-            // Draw dealer cards
-            //System.out.println("Drawing dealer card: " + card);
-            ImageIcon cardImage = cardImages.get(card);
-            if (cardImage != null) {
-                System.out.println("Drawing dealer card: " + card);
-                g.drawImage(cardImage.getImage(), x, y, null);
-                x += cardImage.getIconWidth() + 10; 
+            if (card == null) {
+                // Draw card back for hidden card
+                if (cardBackImage != null) {
+                    g.drawImage(cardBackImage.getImage(), x, y, null);
+                    x += cardBackImage.getIconWidth() + 10;
+                }
+            } else {
+                ImageIcon cardImage = cardImages.get(card);
+                if (cardImage != null) {
+                    g.drawImage(cardImage.getImage(), x, y, null);
+                    x += cardImage.getIconWidth() + 10; 
+                }
             }
         }
 
@@ -82,12 +91,17 @@ public class CardPanel extends JPanel
         x = 100; 
         y = 500;
         for (Card card : playerCards) {
-            System.out.println("Drawing player card: " + card);
-            // Draw player cards
-            ImageIcon cardImage = cardImages.get(card);
-            if (cardImage != null) {
-                g.drawImage(cardImage.getImage(), x, y, null);
-                x += cardImage.getIconWidth() + 10; 
+            if (card == null) {
+                if (cardBackImage != null) {
+                    g.drawImage(cardBackImage.getImage(), x, y, null);
+                    x += cardBackImage.getIconWidth() + 10;
+                }
+            } else {
+                ImageIcon cardImage = cardImages.get(card);
+                if (cardImage != null) {
+                    g.drawImage(cardImage.getImage(), x, y, null);
+                    x += cardImage.getIconWidth() + 10; 
+                }
             }
         }
     }        

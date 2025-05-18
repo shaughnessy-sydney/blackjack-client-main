@@ -91,23 +91,49 @@ public class BlackjackGUI extends JFrame {
         menuBar.add(fileMenu);
         addMenuItem(fileMenu, "Reconnect", () -> {
             System.out.println("Load clicked");
+
+            
             try {
                 List<SessionSummary> sessionSummaryList = clientConnecter.listSessions();
+                // Convert sessionSummaryList to a List<String> for display
+                java.util.List<String> sessionStrings = new java.util.ArrayList<>();
                 for (SessionSummary session : sessionSummaryList) {
-                    System.out.println("Session ID: " + session.sessionId + ", Balance: " + session.balance);
+                    sessionStrings.add("Session ID: " + session.sessionId + ", Balance: " + session.balance);
                 }
+                showListPopup("Choose an item", sessionStrings);
                 
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Error loading game: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
+
+          
+            
         });
         addMenuItem(fileMenu, "New Game", () -> {
             System.out.println("New Game clicked");
             try {
+                // Prompt user for bet amount
+                String input = JOptionPane.showInputDialog(this, "Enter your bet amount:", "Place Bet", JOptionPane.PLAIN_MESSAGE);
+                if (input == null) return; // User cancelled
+                int betAmount;
+                try {
+                    betAmount = Integer.parseInt(input.trim());
+                    if (betAmount <= 0) throw new NumberFormatException();
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this, "Please enter a valid positive number.", "Invalid Bet", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Start new game
                 GameState state = clientConnecter.startGame();
-                System.out.println(state);
                 sessionId = state.sessionId;
-                // TODO: use the game state to update the UI
+
+                // Place bet
+                state = clientConnecter.placeBet(sessionId, betAmount);
+
+                // Update UI with new game state
+                updateUIWithGameState(state);
+
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Error starting new game: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -120,7 +146,11 @@ public class BlackjackGUI extends JFrame {
 
     // convert "THREE OF HEARTS" from server to Card.THREE_OF_HEARTS
     private Card getCard(String cardName) {
-        return Card.valueOf(cardName.toUpperCase().replace(' ', '_'));
+        System.out.println("Card from server: '" + cardName + "'");
+        // Remove leading/trailing spaces, replace all whitespace with underscores, uppercase
+        String cleaned = cardName.trim().replaceAll("\\s+", "_").toUpperCase();
+        System.out.println("Converted to enum: '" + cleaned + "'");
+        return Card.valueOf(cleaned);
     }
 
     private void addMenuItem(JMenu menu, String name, Runnable action) {
@@ -157,6 +187,42 @@ public class BlackjackGUI extends JFrame {
                 if (e.getClickCount() == 2) { // double click to select
                     String selected = list.getSelectedValue();
                     System.out.println("Selected: " + selected);
+
+                    try {
+                        // Extract session ID
+                        String sessionIdString = selected.split(",")[0].replace("Session ID: ", "").trim();
+                        UUID selectedSessionId = UUID.fromString(sessionIdString);
+
+                        // Resume session
+                        GameState state = clientConnecter.resumeSession(selectedSessionId);
+                        sessionId = selectedSessionId;
+
+                        // If no cards, prompt for bet and place it
+                        boolean needsBet = (state.playerCards == null || state.playerCards.isEmpty())
+                                        && (state.dealerCards == null || state.dealerCards.isEmpty());
+                        if (needsBet) {
+                            String input = JOptionPane.showInputDialog(
+                                BlackjackGUI.this, "Enter your bet amount:", "Place Bet", JOptionPane.PLAIN_MESSAGE);
+                            if (input != null) {
+                                try {
+                                    int betAmount = Integer.parseInt(input.trim());
+                                    if (betAmount <= 0) throw new NumberFormatException();
+                                    state = clientConnecter.placeBet(sessionId, betAmount);
+                                } catch (NumberFormatException ex) {
+                                    JOptionPane.showMessageDialog(
+                                        BlackjackGUI.this, "Please enter a valid positive number.", "Invalid Bet", JOptionPane.ERROR_MESSAGE);
+                                }
+                            }
+                        }
+
+                        // Update UI
+                        updateUIWithGameState(state);
+
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(
+                            BlackjackGUI.this, "Error resuming session: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+
                     dialog.dispose();
                 }
             }
@@ -165,6 +231,21 @@ public class BlackjackGUI extends JFrame {
         JScrollPane scrollPane = new JScrollPane(list);
         dialog.add(scrollPane);
         dialog.setVisible(true);
+    }
+
+    private void updateUIWithGameState(GameState state) {
+        cardPanel.clearCards();
+        if (state.playerCards != null) {
+            for (String cardName : state.playerCards) {
+                cardPanel.addPlayerCard(getCard(cardName));
+            }
+        }
+        if (state.dealerCards != null) {
+            for (String cardName : state.dealerCards) {
+                cardPanel.addDealerCard(getCard(cardName));
+            }
+        }
+        repaint();
     }
 
     public static void main(String[] args) {
