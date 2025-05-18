@@ -217,7 +217,7 @@ public class BlackjackGUI extends JFrame {
                                     int betAmount = Integer.parseInt(input.trim());
                                     if (betAmount <= 0) throw new NumberFormatException();
                                     state = clientConnecter.placeBet(sessionId, betAmount);
-                                    state = clientConnecter.getGameState(sessionId);
+                                    //state = clientConnecter.getGameState(sessionId);
                                     System.out.println("After bet, playerCards: " + state.playerCards);
                                     System.out.println("After bet, dealerCards: " + state.dealerCards);
                                 } catch (NumberFormatException ex) {
@@ -227,6 +227,12 @@ public class BlackjackGUI extends JFrame {
                             }
                             
                         }
+                        try {
+                            Thread.sleep(200); // Wait 200 milliseconds
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                        }
+                        state = clientConnecter.getGameState(sessionId);
 
                         // Update UI
                         updateUIWithGameState(state);
@@ -247,6 +253,17 @@ public class BlackjackGUI extends JFrame {
     }
 
     private void updateUIWithGameState(GameState state) {
+        // Auto-reset if less than 5 cards left in the deck
+        if (state.cardsRemaining < 5) {
+            try {
+                state = clientConnecter.resetGame(sessionId);
+                JOptionPane.showMessageDialog(this, "Deck was low. Session has been reset.", "Deck Reset", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error resetting game: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+
         cardPanel.clearCards();
         if (state.playerCards != null) {
             for (String cardName : state.playerCards) {

@@ -118,4 +118,14 @@ public class ClientConnecter
         HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
         return GameState.fromJson(response.body());
     }
+
+    public GameState resetGame(UUID sessionId) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(baseUrl + "/" + sessionId + "/reset" + params))
+            .POST(HttpRequest.BodyPublishers.noBody())
+            .build();
+
+        HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+        return GameState.fromJson(response.body());
+    }
 }
