@@ -59,8 +59,8 @@ public class BlackjackGUI extends JFrame {
         
 
         //additional menu buttons
-        newSessionButton = new JButton("New Session");
-        reconnectButton = new JButton("Reconnect");
+        newSessionButton = new JButton("New Game");
+        reconnectButton = new JButton("Resume");
         exitButton = new JButton("Exit");
         newSessionButton.setVisible(true);
         reconnectButton.setVisible(true);
@@ -397,6 +397,8 @@ public class BlackjackGUI extends JFrame {
                 clientConnecter.finishGame(sessionId);
                 //show menu buttons
                 showMenuButtons();
+                //clear cards
+                cardPanel.clearCards();
 
             }
         }
@@ -407,10 +409,10 @@ public class BlackjackGUI extends JFrame {
     // adds a results dialog to the game
     private void showResultsDialog(GameState state) {
         String message = "Game Over!\n";
-        message += "Outcome: " + state.outcome + "\n";
-        message += "Balance: " + state.balance + "\n";
+        //message += "Outcome: " + state.results() + "\n";
+        message += "New Balance: " + state.balance + "\n";
 
-        JOptionPane.showMessageDialog(this, message, "Game Results", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, message, state.results(), JOptionPane.INFORMATION_MESSAGE);
     }
 
 

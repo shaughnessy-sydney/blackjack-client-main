@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -50,19 +49,19 @@ public class CardPanel extends JPanel
 
         // add a hit and stand button
         // the actual click handler is defined in the BlackjackGUI class
-        hitButton.setBounds(50, 600, 100, 60);
+        hitButton.setBounds(50, 560, 100, 60);
         add(hitButton);
         
-        standButton.setBounds(200, 600, 100, 60);
+        standButton.setBounds(200, 560, 100, 60);
         add(standButton);
 
 
         //add menu buttons
-        newGameButton.setBounds(350, 600, 100, 60);
+        newGameButton.setBounds(300, 450, 100, 60);
         add(newGameButton);
-        connectButton.setBounds(500, 600, 100, 60);
+        connectButton.setBounds(450, 450, 100, 60);
         add(connectButton);
-        exitButton.setBounds(650, 600, 100, 60);
+        exitButton.setBounds(600, 450, 100, 60);
         add(exitButton);
     }
 

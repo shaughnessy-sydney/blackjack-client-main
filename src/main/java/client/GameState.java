@@ -42,4 +42,9 @@ public class GameState {
             "cardsRemaining: "+cardsRemaining+"\n"+
             "reshuffled: "+reshuffled+"\n";
     }
+
+    public String results() {
+        //returns outcome with underscores converted to spaces
+        return outcome.replace("_", " ");
+    }
 }
