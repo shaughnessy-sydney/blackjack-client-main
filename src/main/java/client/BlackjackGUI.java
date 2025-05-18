@@ -112,6 +112,9 @@ public class BlackjackGUI extends JFrame {
                 JOptionPane.showMessageDialog(this, "Error starting new game: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
+        addMenuItem(fileMenu, "Exit", () -> {
+            System.exit(0);
+        });
 
     }
 
