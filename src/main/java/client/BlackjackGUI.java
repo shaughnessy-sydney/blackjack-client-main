@@ -1,6 +1,5 @@
 package client;
 
-import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -15,13 +14,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -57,14 +54,33 @@ public class BlackjackGUI extends JFrame {
         // now set the action listeners for the hit/stand buttons
         hitButton.addActionListener(e -> {
             System.out.println("Hit button clicked");
-            List<Card> cards = List.of(Card.values());
-            cardPanel.addPlayerCard(cards.get(random.nextInt(cards.size())));
+            GameState state;
+            try {
+                state = clientConnecter.getGameState(sessionId);
+                if(state.canHit) {
+                    state = clientConnecter.hit(sessionId);
+                    state = clientConnecter.getGameState(sessionId);
+                    updateUIWithGameState(state);
+            }
+            } catch (Exception e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
             repaint(); 
         });
+
         standButton.addActionListener(e -> {
             System.out.println("Stand button clicked");
-            List<Card> cards = List.of(Card.values());
-            cardPanel.addDealerCard(cards.get(random.nextInt(cards.size())));
+            GameState state;
+            try {
+                state = clientConnecter.getGameState(sessionId);
+                state = clientConnecter.stand(sessionId);
+                state = clientConnecter.getGameState(sessionId);
+                updateUIWithGameState(state);
+            } catch (Exception e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
             repaint(); 
         });
 
@@ -126,6 +142,14 @@ public class BlackjackGUI extends JFrame {
             }
         });
         addMenuItem(fileMenu, "Exit", () -> {
+            if (sessionId != null) {
+                try{
+                    clientConnecter.finishGame(sessionId);
+                }
+                catch (Exception e) {
+                    JOptionPane.showMessageDialog(this, "Error exiting game: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
             System.exit(0);
         });
 
@@ -156,6 +180,7 @@ public class BlackjackGUI extends JFrame {
         }
     }
 
+    
     public void showListPopup(String title, java.util.List<String> items) {
         JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), title, Dialog.ModalityType.APPLICATION_MODAL);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
