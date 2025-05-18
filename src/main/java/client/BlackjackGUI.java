@@ -258,6 +258,27 @@ public class BlackjackGUI extends JFrame {
             try {
                 state = clientConnecter.resetGame(sessionId);
                 JOptionPane.showMessageDialog(this, "Deck was low. Session has been reset.", "Deck Reset", JOptionPane.INFORMATION_MESSAGE);
+
+                // Prompt for a new bet after reset
+                String input = JOptionPane.showInputDialog(this, "Enter your bet amount:", "Place Bet", JOptionPane.PLAIN_MESSAGE);
+                if (input != null) {
+                    try {
+                        int betAmount = Integer.parseInt(input.trim());
+                        if (betAmount <= 0) throw new NumberFormatException();
+                        state = clientConnecter.placeBet(sessionId, betAmount);
+                        // Optionally, fetch the updated state after betting
+                        Thread.sleep(200);
+                        state = clientConnecter.getGameState(sessionId);
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(this, "Please enter a valid positive number.", "Invalid Bet", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                } else {
+                    // User cancelled bet, just return
+                    return;
+                }
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Error resetting game: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 return;
