@@ -9,7 +9,7 @@ public class ListPopup {
     public static void showListPopup(Component parent, String title, java.util.List<String> items) {
         JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(parent), title, Dialog.ModalityType.APPLICATION_MODAL);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        dialog.setSize(300, 200);
+        dialog.setSize(500, 200);
         dialog.setLocationRelativeTo(parent);
 
         JList<String> list = new JList<>(new DefaultListModel<>());
@@ -19,9 +19,11 @@ public class ListPopup {
         }
 
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        list.setFixedCellWidth(460); // Make list cells wide
+
         list.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) { // double click to select
+                if (e.getClickCount() == 2) {
                     String selected = list.getSelectedValue();
                     System.out.println("Selected: " + selected);
                     dialog.dispose();
@@ -30,7 +32,8 @@ public class ListPopup {
         });
 
         JScrollPane scrollPane = new JScrollPane(list);
-        dialog.add(scrollPane);
+        dialog.getContentPane().setLayout(new BorderLayout());
+        dialog.add(scrollPane, BorderLayout.CENTER);
         dialog.setVisible(true);
     }
 

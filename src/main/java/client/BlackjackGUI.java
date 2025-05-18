@@ -1,6 +1,8 @@
 package client;
 
+import java.awt.BorderLayout;
 import java.awt.Dialog;
+import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
@@ -90,12 +92,23 @@ public class BlackjackGUI extends JFrame {
 
         reconnectButton.addActionListener(e -> {
             System.out.println("Load clicked");
+            //exit current session
+            if (sessionId != null) {
+                try{
+                    clientConnecter.finishGame(sessionId);
+                }
+                catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Error exiting game: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+
+            // list sessions
             try {
                 List<SessionSummary> sessionSummaryList = clientConnecter.listSessions();
                 // Convert sessionSummaryList to a List<String> for display
                 java.util.List<String> sessionStrings = new java.util.ArrayList<>();
                 for (SessionSummary session : sessionSummaryList) {
-                    sessionStrings.add("Session ID: " + session.sessionId + ", Balance: " + session.balance);
+                    sessionStrings.add("Session ID: " + session.sessionId + ", Balance: " + session.balance);               
                 }
                 showListPopup("Choose an item", sessionStrings);
                 hideMenuButtons();
@@ -175,13 +188,22 @@ public class BlackjackGUI extends JFrame {
         JMenuBar menuBar = new JMenuBar();
         this.setJMenuBar(menuBar);
 
-        JMenu fileMenu = new JMenu("File");
+        JMenu fileMenu = new JMenu("Settings");
         
         menuBar.add(fileMenu);
         addMenuItem(fileMenu, "Reconnect", () -> {
             System.out.println("Load clicked");
+            //exit current session
+            if (sessionId != null) {
+                try{
+                    clientConnecter.finishGame(sessionId);
+                }
+                catch (Exception e) {
+                    JOptionPane.showMessageDialog(this, "Error exiting game: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
 
-            
+            // list sessions
             try {
                 List<SessionSummary> sessionSummaryList = clientConnecter.listSessions();
                 // Convert sessionSummaryList to a List<String> for display
@@ -229,10 +251,10 @@ public class BlackjackGUI extends JFrame {
 
     // convert "THREE OF HEARTS" from server to Card.THREE_OF_HEARTS
     private Card getCard(String cardName) {
-        System.out.println("Card from server: '" + cardName + "'");
+        //System.out.println("Card from server: '" + cardName + "'"); debug
         if (cardName == null) return null;
         Card card = Card.fromString(cardName);
-        System.out.println("Converted to enum: '" + card + "'");
+        //System.out.println("Converted to enum: '" + card + "'"); debug
         return card;
     }
 
@@ -267,8 +289,6 @@ public class BlackjackGUI extends JFrame {
     public void showListPopup(String title, java.util.List<String> items) {
         JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), title, Dialog.ModalityType.APPLICATION_MODAL);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        dialog.setSize(300, 200);
-        dialog.setLocationRelativeTo(this);
 
         JList<String> list = new JList<>(new DefaultListModel<>());
         DefaultListModel<String> model = (DefaultListModel<String>) list.getModel();
@@ -277,6 +297,8 @@ public class BlackjackGUI extends JFrame {
         }
 
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        list.setFixedCellWidth(460); // Ensures each cell is wide
+
         list.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) { // double click to select
@@ -322,7 +344,14 @@ public class BlackjackGUI extends JFrame {
         });
 
         JScrollPane scrollPane = new JScrollPane(list);
-        dialog.add(scrollPane);
+        scrollPane.setPreferredSize(new Dimension(480, 140)); // Make the popup wide
+
+        dialog.getContentPane().setLayout(new BorderLayout());
+        dialog.add(scrollPane, BorderLayout.CENTER);
+
+        dialog.pack();
+        dialog.setSize(500, 200); // Enforce minimum size if needed
+        dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }
 

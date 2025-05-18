@@ -96,7 +96,7 @@ public class CardPanel extends JPanel
                 //System.out.println("Drawing dealer card: " + card);
                 ImageIcon cardImage = cardImages.get(card);
                 if (cardImage != null) {
-                    System.out.println("Drawing dealer card: " + card);
+                    //System.out.println("Drawing dealer card: " + card);
                     g.drawImage(cardImage.getImage(), x, y, null);
                     x += cardImage.getIconWidth() + 10; 
                 }
