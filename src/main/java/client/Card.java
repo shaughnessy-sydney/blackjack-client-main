@@ -61,13 +61,24 @@ public enum Card
     }
 
     public static Card fromString(String card) {
-        card = card.toUpperCase().replace(' ', '_');
+        if (card == null) return null;
+        card = card.trim();
+        if (card.equalsIgnoreCase("???")) {
+            return null;
+        }
+        // Try matching by string field (e.g., "AH", "2C")
         for (Card c : Card.values()) {
-            if (c.string.equals(card)) {
+            if (c.string.equalsIgnoreCase(card)) {
                 return c;
             }
         }
-        throw new IllegalArgumentException("Invalid card: " + card);
+        // Try matching by enum name (e.g., "ACE_OF_HEARTS")
+        String cleaned = card.toUpperCase().replaceAll("\\s+", "_");
+        try {
+            return Card.valueOf(cleaned);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid card: " + card);
+        }
     }
 
     public String toString() {

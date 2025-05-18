@@ -130,6 +130,15 @@ public class BlackjackGUI extends JFrame {
 
                 // Place bet
                 state = clientConnecter.placeBet(sessionId, betAmount);
+                // Fetch the updated state after betting
+                try {
+                    Thread.sleep(200); // Wait 200 milliseconds
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+                state = clientConnecter.getGameState(sessionId);
+                System.out.println("After bet, playerCards: " + state.playerCards);
+                System.out.println("After bet, dealerCards: " + state.dealerCards);
 
                 // Update UI with new game state
                 updateUIWithGameState(state);
@@ -147,10 +156,10 @@ public class BlackjackGUI extends JFrame {
     // convert "THREE OF HEARTS" from server to Card.THREE_OF_HEARTS
     private Card getCard(String cardName) {
         System.out.println("Card from server: '" + cardName + "'");
-        // Remove leading/trailing spaces, replace all whitespace with underscores, uppercase
-        String cleaned = cardName.trim().replaceAll("\\s+", "_").toUpperCase();
-        System.out.println("Converted to enum: '" + cleaned + "'");
-        return Card.valueOf(cleaned);
+        if (cardName == null) return null;
+        Card card = Card.fromString(cardName);
+        System.out.println("Converted to enum: '" + card + "'");
+        return card;
     }
 
     private void addMenuItem(JMenu menu, String name, Runnable action) {
@@ -208,11 +217,15 @@ public class BlackjackGUI extends JFrame {
                                     int betAmount = Integer.parseInt(input.trim());
                                     if (betAmount <= 0) throw new NumberFormatException();
                                     state = clientConnecter.placeBet(sessionId, betAmount);
+                                    state = clientConnecter.getGameState(sessionId);
+                                    System.out.println("After bet, playerCards: " + state.playerCards);
+                                    System.out.println("After bet, dealerCards: " + state.dealerCards);
                                 } catch (NumberFormatException ex) {
                                     JOptionPane.showMessageDialog(
                                         BlackjackGUI.this, "Please enter a valid positive number.", "Invalid Bet", JOptionPane.ERROR_MESSAGE);
                                 }
                             }
+                            
                         }
 
                         // Update UI

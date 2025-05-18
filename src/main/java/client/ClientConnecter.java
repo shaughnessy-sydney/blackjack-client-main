@@ -108,4 +108,14 @@ public class ClientConnecter
         HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
         return new Gson().fromJson(response.body(), GameState.class);
     }
+
+    public GameState getGameState(UUID sessionId) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(baseUrl + "/" + sessionId + "/state" + params))
+            .GET()
+            .build();
+
+        HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+        return GameState.fromJson(response.body());
+    }
 }
