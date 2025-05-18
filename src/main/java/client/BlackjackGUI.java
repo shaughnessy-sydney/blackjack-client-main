@@ -111,37 +111,15 @@ public class BlackjackGUI extends JFrame {
         });
         addMenuItem(fileMenu, "New Game", () -> {
             System.out.println("New Game clicked");
-            try {
-                // Prompt user for bet amount
-                String input = JOptionPane.showInputDialog(this, "Enter your bet amount:", "Place Bet", JOptionPane.PLAIN_MESSAGE);
-                if (input == null) return; // User cancelled
-                int betAmount;
                 try {
-                    betAmount = Integer.parseInt(input.trim());
-                    if (betAmount <= 0) throw new NumberFormatException();
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(this, "Please enter a valid positive number.", "Invalid Bet", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                // Start new game
-                GameState state = clientConnecter.startGame();
+                    GameState state = clientConnecter.startGame();
                 sessionId = state.sessionId;
-
-                // Place bet
-                state = clientConnecter.placeBet(sessionId, betAmount);
-                // Fetch the updated state after betting
-                try {
-                    Thread.sleep(200); // Wait 200 milliseconds
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
+                state = promptAndPlaceBet();
+                if (state != null) {
+                    System.out.println("After bet, playerCards: " + state.playerCards);
+                    System.out.println("After bet, dealerCards: " + state.dealerCards);
+                    updateUIWithGameState(state);
                 }
-                state = clientConnecter.getGameState(sessionId);
-                System.out.println("After bet, playerCards: " + state.playerCards);
-                System.out.println("After bet, dealerCards: " + state.dealerCards);
-
-                // Update UI with new game state
-                updateUIWithGameState(state);
 
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Error starting new game: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -210,22 +188,10 @@ public class BlackjackGUI extends JFrame {
                         boolean needsBet = (state.playerCards == null || state.playerCards.isEmpty())
                                         && (state.dealerCards == null || state.dealerCards.isEmpty());
                         if (needsBet) {
-                            String input = JOptionPane.showInputDialog(
-                                BlackjackGUI.this, "Enter your bet amount:", "Place Bet", JOptionPane.PLAIN_MESSAGE);
-                            if (input != null) {
-                                try {
-                                    int betAmount = Integer.parseInt(input.trim());
-                                    if (betAmount <= 0) throw new NumberFormatException();
-                                    state = clientConnecter.placeBet(sessionId, betAmount);
-                                    //state = clientConnecter.getGameState(sessionId);
-                                    System.out.println("After bet, playerCards: " + state.playerCards);
-                                    System.out.println("After bet, dealerCards: " + state.dealerCards);
-                                } catch (NumberFormatException ex) {
-                                    JOptionPane.showMessageDialog(
-                                        BlackjackGUI.this, "Please enter a valid positive number.", "Invalid Bet", JOptionPane.ERROR_MESSAGE);
-                                }
+                            if (needsBet) {
+                                state = promptAndPlaceBet();
+                                if (state == null) return;
                             }
-                            
                         }
                         try {
                             Thread.sleep(200); // Wait 200 milliseconds
@@ -260,25 +226,8 @@ public class BlackjackGUI extends JFrame {
                 JOptionPane.showMessageDialog(this, "Deck was low. Session has been reset.", "Deck Reset", JOptionPane.INFORMATION_MESSAGE);
 
                 // Prompt for a new bet after reset
-                String input = JOptionPane.showInputDialog(this, "Enter your bet amount:", "Place Bet", JOptionPane.PLAIN_MESSAGE);
-                if (input != null) {
-                    try {
-                        int betAmount = Integer.parseInt(input.trim());
-                        if (betAmount <= 0) throw new NumberFormatException();
-                        state = clientConnecter.placeBet(sessionId, betAmount);
-                        // Optionally, fetch the updated state after betting
-                        Thread.sleep(200);
-                        state = clientConnecter.getGameState(sessionId);
-                    } catch (NumberFormatException ex) {
-                        JOptionPane.showMessageDialog(this, "Please enter a valid positive number.", "Invalid Bet", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                    }
-                } else {
-                    // User cancelled bet, just return
-                    return;
-                }
+                state = promptAndPlaceBet();
+                if (state == null) return; // User cancelled
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Error resetting game: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -297,6 +246,27 @@ public class BlackjackGUI extends JFrame {
             }
         }
         repaint();
+    }
+
+    private GameState promptAndPlaceBet() throws Exception {
+        while (true) {
+            String input = JOptionPane.showInputDialog(this, "Enter your bet amount:", "Place Bet", JOptionPane.PLAIN_MESSAGE);
+            if (input == null) return null; // User cancelled
+            try {
+                int betAmount = Integer.parseInt(input.trim());
+                if (betAmount <= 0) throw new NumberFormatException();
+                GameState state = clientConnecter.placeBet(sessionId, betAmount);
+                // Optionally, fetch the updated state after betting
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+                return clientConnecter.getGameState(sessionId);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid positive number.", "Invalid Bet", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     public static void main(String[] args) {
