@@ -29,6 +29,9 @@ public class BlackjackGUI extends JFrame {
     private JButton hitButton;
     private JButton standButton;
     
+    private JButton newSessionButton;
+    private JButton reconnectButton;
+    private JButton exitButton;
 
     private String BASE_URL = "http://euclid.knox.edu:8080/api/blackjack";
     private String USERNAME = "lashaughnessy";
@@ -46,13 +49,76 @@ public class BlackjackGUI extends JFrame {
         loadCards();
         // create and pass the buttons to the card panel
         // it will resize them and add them to the panel
+
+        //game buttons
         hitButton = new JButton("Hit");
         standButton = new JButton("Stand");
         hitButton.setVisible(false);
         standButton.setVisible(false);
 
-        cardPanel = new CardPanel(hitButton, standButton, cardImages);
+        
+
+        //additional menu buttons
+        newSessionButton = new JButton("New Session");
+        reconnectButton = new JButton("Reconnect");
+        exitButton = new JButton("Exit");
+        newSessionButton.setVisible(true);
+        reconnectButton.setVisible(true);
+        exitButton.setVisible(true);
+        
+        cardPanel = new CardPanel(hitButton, standButton, cardImages, 
+            newSessionButton, reconnectButton, exitButton);
         setContentPane(cardPanel);
+        
+        
+        
+        // set the action listeners for the menu buttons
+        newSessionButton.addActionListener(e -> {
+            System.out.println("New Game clicked");
+            try {
+                GameState state = clientConnecter.startGame();
+                sessionId = state.sessionId;
+                state = promptAndPlaceBet();
+                if (state != null) {
+                    updateUIWithGameState(state);
+                }
+                hideMenuButtons();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error starting new game: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        reconnectButton.addActionListener(e -> {
+            System.out.println("Load clicked");
+            try {
+                List<SessionSummary> sessionSummaryList = clientConnecter.listSessions();
+                // Convert sessionSummaryList to a List<String> for display
+                java.util.List<String> sessionStrings = new java.util.ArrayList<>();
+                for (SessionSummary session : sessionSummaryList) {
+                    sessionStrings.add("Session ID: " + session.sessionId + ", Balance: " + session.balance);
+                }
+                showListPopup("Choose an item", sessionStrings);
+                hideMenuButtons();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error loading game: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+
+        exitButton.addActionListener(e -> {
+            if (sessionId != null) {
+                try{
+                    clientConnecter.finishGame(sessionId);
+                }
+                catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Error exiting game: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+            System.exit(0);
+        });
+
+
+        
 
         // now set the action listeners for the hit/stand buttons
         hitButton.addActionListener(e -> {
@@ -72,6 +138,8 @@ public class BlackjackGUI extends JFrame {
             repaint(); 
         });
 
+
+        
         standButton.addActionListener(e -> {
             System.out.println("Stand button clicked");
             GameState state;
@@ -122,14 +190,13 @@ public class BlackjackGUI extends JFrame {
                     sessionStrings.add("Session ID: " + session.sessionId + ", Balance: " + session.balance);
                 }
                 showListPopup("Choose an item", sessionStrings);
-                
+                hideMenuButtons();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Error loading game: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
-
-          
-            
         });
+
+
         addMenuItem(fileMenu, "New Game", () -> {
             System.out.println("New Game clicked");
                 try {
@@ -139,11 +206,13 @@ public class BlackjackGUI extends JFrame {
                 if (state != null) {
                     updateUIWithGameState(state);
                 }
-
+                hideMenuButtons();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Error starting new game: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
+
+        
         addMenuItem(fileMenu, "Exit", () -> {
             if (sessionId != null) {
                 try{
@@ -183,7 +252,18 @@ public class BlackjackGUI extends JFrame {
         }
     }
 
-    
+    private void hideMenuButtons() {
+        newSessionButton.setVisible(false);
+        reconnectButton.setVisible(false);
+        exitButton.setVisible(false);
+    }
+
+    private void showMenuButtons() {
+        newSessionButton.setVisible(true);
+        reconnectButton.setVisible(true);
+        exitButton.setVisible(true);
+    }
+
     public void showListPopup(String title, java.util.List<String> items) {
         JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), title, Dialog.ModalityType.APPLICATION_MODAL);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -235,7 +315,7 @@ public class BlackjackGUI extends JFrame {
                         JOptionPane.showMessageDialog(
                             BlackjackGUI.this, "Error resuming session: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                     }
-
+                    hideMenuButtons();
                     dialog.dispose();
                 }
             }
@@ -316,7 +396,7 @@ public class BlackjackGUI extends JFrame {
             else{
                 clientConnecter.finishGame(sessionId);
                 //show menu buttons
-
+                showMenuButtons();
 
             }
         }

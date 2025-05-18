@@ -19,6 +19,9 @@ public class CardPanel extends JPanel
 
     private JButton hitButton;
     private JButton standButton;
+    private JButton newGameButton;
+    private JButton connectButton;
+    private JButton exitButton;
 
     private List<Card> dealerCards = new ArrayList<>();
     private List<Card> playerCards = new ArrayList<>();
@@ -27,11 +30,14 @@ public class CardPanel extends JPanel
 
     private ImageIcon cardBackImage; // Add this field
 
-    public CardPanel(JButton hitButton, JButton standButton, Map<Card, ImageIcon> cardImages)
+    public CardPanel(JButton hitButton, JButton standButton, Map<Card, ImageIcon> cardImages, JButton newGameButton, JButton connectButton, JButton exitButton) 
     {
         this.hitButton = hitButton;
         this.standButton = standButton;
         this.cardImages = cardImages;
+        this.newGameButton = newGameButton;
+        this.connectButton = connectButton;
+        this.exitButton = exitButton;
 
         // Load the card back image
         cardBackImage = new ImageIcon(getClass().getResource("/assets/back.png"));
@@ -50,6 +56,14 @@ public class CardPanel extends JPanel
         standButton.setBounds(200, 600, 100, 60);
         add(standButton);
 
+
+        //add menu buttons
+        newGameButton.setBounds(350, 600, 100, 60);
+        add(newGameButton);
+        connectButton.setBounds(500, 600, 100, 60);
+        add(connectButton);
+        exitButton.setBounds(650, 600, 100, 60);
+        add(exitButton);
     }
 
     public void clearCards() {
