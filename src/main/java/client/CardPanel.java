@@ -94,7 +94,7 @@ public class CardPanel extends JPanel
 
         // player cards
         x = 100; 
-        y = 500;
+        y = 400;
         for (Card card : playerCards) {
             if (card == null) {
                 if (cardBackImage != null) {
@@ -102,7 +102,7 @@ public class CardPanel extends JPanel
                     x += cardBackImage.getIconWidth() + 10;
                 }
             } else {
-                System.out.println("Drawing player card: " + card);
+                //System.out.println("Drawing player card: " + card);
                 // Draw player cards
                 ImageIcon cardImage = cardImages.get(card);
                 if (cardImage != null) {

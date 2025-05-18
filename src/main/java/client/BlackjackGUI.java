@@ -48,6 +48,9 @@ public class BlackjackGUI extends JFrame {
         // it will resize them and add them to the panel
         hitButton = new JButton("Hit");
         standButton = new JButton("Stand");
+        hitButton.setVisible(false);
+        standButton.setVisible(false);
+
         cardPanel = new CardPanel(hitButton, standButton, cardImages);
         setContentPane(cardPanel);
 
@@ -96,6 +99,8 @@ public class BlackjackGUI extends JFrame {
         //TODO: keyboard shortcuts
         //TODO: mouse events
     }
+
+    
 
     private void addMenuBar()
     {
@@ -273,6 +278,10 @@ public class BlackjackGUI extends JFrame {
 
         //check if game is over
         if(state.gameOver) {
+            //hide stand/hit buttons
+            hitButton.setVisible(false);
+            standButton.setVisible(false);
+            // show results dialog
             showResultsDialog(state);
             try {
                 clientConnecter.finishGame(sessionId);
@@ -305,7 +314,10 @@ public class BlackjackGUI extends JFrame {
                         updateUIWithGameState(state);
             }
             else{
+                clientConnecter.finishGame(sessionId);
                 //show menu buttons
+
+
             }
         }
         repaint();
@@ -336,6 +348,9 @@ public class BlackjackGUI extends JFrame {
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
                 }
+                //show hit/stand buttons
+                hitButton.setVisible(true);
+                standButton.setVisible(true);
                 return clientConnecter.getGameState(sessionId);
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Please enter a valid positive number.", "Invalid Bet", JOptionPane.ERROR_MESSAGE);
