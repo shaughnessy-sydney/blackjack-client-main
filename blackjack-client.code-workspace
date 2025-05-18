@@ -1,0 +1,18 @@
+{
+    "folders": [
+      {
+        "path": "."
+      }
+    ],
+    "settings": {
+      "java.configuration.updateBuildConfiguration": "interactive",
+      "java.project.referencedLibraries": [
+        "lib/**/*.jar"
+      ],
+      "java.project.sourcePaths": [
+        "src/main/java"
+      ],
+      "java.debug.settings.console": "integratedTerminal"
+    }
+  }
+  
