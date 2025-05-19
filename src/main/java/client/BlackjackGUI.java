@@ -25,6 +25,9 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
+import javazoom.jl.player.Player;
+import java.io.FileInputStream;
+
 public class BlackjackGUI extends JFrame {
     private static final long serialVersionUID = 1L;
 
@@ -178,6 +181,7 @@ public class BlackjackGUI extends JFrame {
         addMenuBar();
         //TODO: keyboard shortcuts
         //TODO: mouse events
+        sound();
     }
 
     
@@ -472,6 +476,18 @@ public class BlackjackGUI extends JFrame {
                 JOptionPane.showMessageDialog(this, "Please enter a valid positive number that is a multiple of 10.", "Invalid Bet", JOptionPane.ERROR_MESSAGE);
             }
         }
+    }
+
+
+    public static void sound() {
+        new Thread(() -> {
+            try (FileInputStream file = new FileInputStream("src/main/resources/sound/music.mp3")) {
+                Player playMP3 = new Player(file);
+                playMP3.play();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     public static void main(String[] args) {
