@@ -277,12 +277,16 @@ public class BlackjackGUI extends JFrame {
         newSessionButton.setVisible(false);
         reconnectButton.setVisible(false);
         exitButton.setVisible(false);
+        //hide the splash image
+        cardPanel.setShowSplash(false);
     }
 
     private void showMenuButtons() {
         newSessionButton.setVisible(true);
         reconnectButton.setVisible(true);
         exitButton.setVisible(true);
+        //show the splash image
+        cardPanel.setShowSplash(true);
     }
 
     public void showListPopup(String title, java.util.List<String> items) {

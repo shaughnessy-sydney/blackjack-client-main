@@ -28,6 +28,8 @@ public class CardPanel extends JPanel
     //private Random random;
 
     private ImageIcon cardBackImage; // Add this field
+    private ImageIcon splashImage = new ImageIcon(getClass().getResource("/assets/splash.png"));
+    private boolean showSplash = true; // Control flag
 
     public CardPanel(JButton hitButton, JButton standButton, Map<Card, ImageIcon> cardImages, JButton newGameButton, JButton connectButton, JButton exitButton) 
     {
@@ -78,9 +80,23 @@ public class CardPanel extends JPanel
         playerCards.add(card);
     }
 
+    public void setShowSplash(boolean show) {
+        this.showSplash = show;
+        repaint();
+    }
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
+
+        if (showSplash && splashImage != null) {
+            // Center the splash image
+            int imgW = splashImage.getIconWidth();
+            int imgH = splashImage.getIconHeight();
+            int x = (getWidth() - imgW) / 2;
+            int y = (getHeight() - imgH) / 2;
+            g.drawImage(splashImage.getImage(), x+20, y/2, null);
+        }
 
         int x = 100;
         int y = 100;
