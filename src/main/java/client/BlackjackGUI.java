@@ -455,7 +455,7 @@ public class BlackjackGUI extends JFrame {
             if (input == null) return null; // User cancelled
             try {
                 int betAmount = Integer.parseInt(input.trim());
-                if (betAmount <= 0) throw new NumberFormatException();
+                if (betAmount <= 0 || betAmount %10 !=0) throw new NumberFormatException();
                 GameState state = clientConnecter.placeBet(sessionId, betAmount);
                 // Optionally, fetch the updated state after betting
                 try {
@@ -469,7 +469,7 @@ public class BlackjackGUI extends JFrame {
                 
                 return clientConnecter.getGameState(sessionId);
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Please enter a valid positive number.", "Invalid Bet", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Please enter a valid positive number that is a multiple of 10.", "Invalid Bet", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
